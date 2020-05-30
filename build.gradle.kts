@@ -90,9 +90,13 @@ subprojects {
         mavenCentral()
     }
 
-    tasks.getting(ProcessResources::class) {
+    tasks.withType<ProcessResources> {
+        include("*.yml")
+        include("*.toml")
         filter<ReplaceTokens>(
-            "VERSION" to project.version.toString()
+            "tokens" to mapOf(
+                "VERSION" to project.version.toString()
+            )
         )
     }
 }
@@ -117,7 +121,7 @@ allprojects {
         jcenter() // Required for Gradle plugins
     }
 
-    tasks.getting(ShadowJar::class) {
+    tasks.withType<ShadowJar> {
         this.archiveClassifier.set(null as String?)
         this.archiveBaseName.set(
             if (project == rootProject) project.name
@@ -149,7 +153,7 @@ allprojects {
         from(sourceSets.main.get().allSource)
     }
 
-    tasks.getting(Jar::class) {
+    tasks.withType<Jar> {
         manifest {
             attributes("Implementation-Version" to project.version.toString())
         }

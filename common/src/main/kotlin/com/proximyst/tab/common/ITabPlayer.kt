@@ -75,4 +75,9 @@ interface ITabPlayer<P : Any> {
      * @param permission The permission to check whether the player has.
      */
     fun hasPermission(permission: String): Boolean
+
+    /**
+     * Do necessary cleanup for this player.
+     */
+    fun cleanup()
 }

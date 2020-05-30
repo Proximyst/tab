@@ -1,0 +1,25 @@
+# Settings regarding header & footer for players.
+[header-footer]
+# Whether header & footer should be displayed.
+#
+# Type: Boolean
+# Default: true
+enabled = true
+
+# The header to display.
+# This can be empty ([]) for no header.
+#
+# Type: List of strings
+header = [
+  "&6&lServer Name",
+  "",
+  "&4You're cool :sunglasses:",
+]
+
+# The footer to display.
+# This can be empty ([]) for no footer.
+#
+# Type: List of strings
+footer = [
+  "&9Wee!!",
+]

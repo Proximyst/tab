@@ -13,7 +13,7 @@ import java.util.*
 class BukkitPlayer(override val platformPlayer: Player, private val main: TabPlugin) : ITabPlayer<Player> {
     private val team = TabTeam(this)
 
-    internal fun cleanup() {
+    override fun cleanup() {
         try {
             team.unregister()
         } catch (ignored: IllegalStateException) {
