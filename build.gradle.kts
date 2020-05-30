@@ -17,6 +17,11 @@ plugins {
     id("com.github.hierynomus.license") version "0.15.0"
 }
 
+allprojects {
+    group = "com.proximyst.tab"
+    version = "0.1.0"
+}
+
 subprojects {
     apply {
         plugin<JavaLibraryPlugin>()
@@ -102,9 +107,6 @@ subprojects {
 }
 
 allprojects {
-    group = "com.proximyst.tab"
-    version = "0.1.0"
-
     configure<JavaPluginConvention> {
         sourceCompatibility = JavaVersion.VERSION_1_8
         targetCompatibility = sourceCompatibility
