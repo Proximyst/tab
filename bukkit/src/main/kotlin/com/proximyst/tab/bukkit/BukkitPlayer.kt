@@ -60,6 +60,28 @@ class BukkitPlayer(override val platformPlayer: Player, private val main: TabPlu
                 team.suffix = LegacyComponentSerializer.legacy().serialize(value, ChatColor.COLOR_CHAR)
         }
 
+    override var playerListHeader: TextComponent?
+        get() = platformPlayer.playerListHeader?.ifEmpty { null }
+            ?.let { LegacyComponentSerializer.legacy().deserialize(it, ChatColor.COLOR_CHAR) }
+        set(value) {
+            if (value?.isEmpty != false)
+                platformPlayer.playerListHeader = null
+            else
+                platformPlayer.playerListHeader =
+                    LegacyComponentSerializer.legacy().serialize(value, ChatColor.COLOR_CHAR)
+        }
+
+    override var playerListFooter: TextComponent?
+        get() = platformPlayer.playerListFooter?.ifEmpty { null }
+            ?.let { LegacyComponentSerializer.legacy().deserialize(it, ChatColor.COLOR_CHAR) }
+        set(value) {
+            if (value?.isEmpty != false)
+                platformPlayer.playerListFooter = null
+            else
+                platformPlayer.playerListFooter =
+                    LegacyComponentSerializer.legacy().serialize(value, ChatColor.COLOR_CHAR)
+        }
+
     override fun sendMessage(text: Component) =
         platformPlayer.sendRawMessage(GsonComponentSerializer.INSTANCE.serialize(text))
 

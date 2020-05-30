@@ -46,6 +46,16 @@ interface ITabPlayer<P : Any> {
     var playerListSuffix: TextComponent?
 
     /**
+     * The header in the player list.
+     */
+    var playerListHeader: TextComponent?
+
+    /**
+     * The footer in the player list.
+     */
+    var playerListFooter: TextComponent?
+
+    /**
      * Send a message to the player.
      *
      * @param text The text to send to the player.
