@@ -1,0 +1,36 @@
+---
+kind: pipeline
+type: docker
+name: gradle build and publish
+
+steps:
+  - name: build
+    image: gradle:jdk8
+    commands:
+      - export GRADLE_USER_HOME=/drone/.gradle
+      - ln -s /gradle-cache /drone/.gradle || true
+      - ./gradlew shadowJar --no-daemon --parallel
+    volumes:
+      - name: cache
+        path: /gradle-cache
+  - name: publish
+    image: gradle:jdk8
+    commands:
+      - export GRADLE_USER_HOME=/drone/.gradle
+      - ln -s /gradle-cache /drone/.gradle || true
+      - ./gradlew publish --no-daemon
+    volumes:
+      - name: cache
+        path: /gradle-cache
+    environment:
+      NEXUS_USERNAME:
+        from_secret: nexus_username
+      NEXUS_PASSWORD:
+        from_secret: nexus_password
+    when:
+      ref:
+        - refs/tags/v*
+
+volumes:
+  - name: cache
+    temp: {}

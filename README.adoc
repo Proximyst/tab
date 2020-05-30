@@ -1,0 +1,60 @@
+= tab
+
+image::https://drone.proximyst.com/api/badges/Proximyst/tab/status.svg[link="https://drone.proximyst.com/Proximyst/tab"]
+
+A work-in-progress tab manipulation plugin with ease in mind.
+
+== Build
+
+Requirements:
+
+. Java 8-14 JDK.
+
+Method:
+
+. Execute `./gradlew shadowJar`.
+. Find the jars in `./build/libs`.
+
+== Usage
+
+Plop the respective jars into their respective `plugins` directories.
+
+== Depend
+
+The project requires the following repository:
+
+=== Maven
+
+[source,xml]
+----
+<repositories>
+  <repository>
+    <id>proxi-nexus</id>
+    <url>https://nexus.proximyst.com/repository/maven-public/</url>
+  </repository>
+</repositories>
+----
+
+=== Gradle (Kotlin DSL)
+
+[source,kotlin]
+----
+repositories {
+    maven {
+        name = "proxi-nexus"
+        url = uri("https://nexus.proximyst.com/repository/maven-public/")
+    }
+}
+----
+
+=== Gradle (Groovy DSL)
+
+[source,groovy]
+----
+repositories {
+    maven {
+        name = 'proxi-nexus'
+        url = 'https://nexus.proximyst.com/repository/maven-public/'
+    }
+}
+----
