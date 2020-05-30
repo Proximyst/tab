@@ -1,19 +1,18 @@
 package com.proximyst.tab.bukkit
 
-import com.proximyst.tab.bukkit.ext.tabPlayer
 import com.proximyst.tab.common.IPlatform
 import com.proximyst.tab.common.ITabPlayer
 import org.bukkit.Server
 import org.bukkit.entity.Player
 import java.util.*
 
-class BukkitPlatform(override val platform: Server) : IPlatform<Server, Player> {
+class BukkitPlatform(override val platform: Server, private val main: TabPlugin) : IPlatform<Server, Player> {
     override val onlinePlayers: Collection<ITabPlayer<Player>>
-        get() = platform.onlinePlayers.map(Player::tabPlayer)
+        get() = platform.onlinePlayers.map { main.tabPlayers.computeIfAbsent(it) { p -> BukkitPlayer(p, main) } }
 
     override fun getPlayer(name: String): ITabPlayer<Player>? =
-        platform.getPlayerExact(name)?.tabPlayer
+        platform.getPlayerExact(name)?.let(main.tabPlayers::get)
 
     override fun getPlayer(uuid: UUID): ITabPlayer<Player>? =
-        platform.getPlayer(uuid)?.tabPlayer
+        platform.getPlayer(uuid)?.let(main.tabPlayers::get)
 }

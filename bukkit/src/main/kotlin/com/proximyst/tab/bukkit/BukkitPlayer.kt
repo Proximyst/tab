@@ -1,5 +1,6 @@
 package com.proximyst.tab.bukkit
 
+import com.proximyst.tab.bukkit.platform.TabTeam
 import com.proximyst.tab.common.ITabPlayer
 import net.kyori.text.Component
 import net.kyori.text.TextComponent
@@ -9,7 +10,17 @@ import org.bukkit.ChatColor
 import org.bukkit.entity.Player
 import java.util.*
 
-class BukkitPlayer(override val platformPlayer: Player) : ITabPlayer<Player> {
+class BukkitPlayer(override val platformPlayer: Player, private val main: TabPlugin) : ITabPlayer<Player> {
+    private val team = TabTeam(this)
+
+    internal fun cleanup() {
+        try {
+            team.unregister()
+        } catch (ignored: IllegalStateException) {
+            main.logger.warning("The team for $name was already unregistered!")
+        }
+    }
+
     override val isConnected: Boolean
         get() = platformPlayer.isOnline
 
@@ -28,6 +39,26 @@ class BukkitPlayer(override val platformPlayer: Player) : ITabPlayer<Player> {
             if (value.isEmpty) null
             else LegacyComponentSerializer.legacy().serialize(value, ChatColor.COLOR_CHAR)
         )
+
+    override var playerListPrefix: TextComponent?
+        get() = team.prefix.ifEmpty { null }
+            ?.let { LegacyComponentSerializer.legacy().deserialize(it, ChatColor.COLOR_CHAR) }
+        set(value) {
+            if (value?.isEmpty != false)
+                team.prefix = ""
+            else
+                team.prefix = LegacyComponentSerializer.legacy().serialize(value, ChatColor.COLOR_CHAR)
+        }
+
+    override var playerListSuffix: TextComponent?
+        get() = team.suffix.ifEmpty { null }
+            ?.let { LegacyComponentSerializer.legacy().deserialize(it, ChatColor.COLOR_CHAR) }
+        set(value) {
+            if (value?.isEmpty != false)
+                team.suffix = ""
+            else
+                team.suffix = LegacyComponentSerializer.legacy().serialize(value, ChatColor.COLOR_CHAR)
+        }
 
     override fun sendMessage(text: Component) =
         platformPlayer.sendRawMessage(GsonComponentSerializer.INSTANCE.serialize(text))

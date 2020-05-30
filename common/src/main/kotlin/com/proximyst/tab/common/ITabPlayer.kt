@@ -33,7 +33,17 @@ interface ITabPlayer<P : Any> {
     /**
      * The name of the player in the player list.
      */
-    var playerListName: String
+    var playerListName: TextComponent
+
+    /**
+     * The prefix of the player's listing in the player list.
+     */
+    var playerListPrefix: TextComponent?
+
+    /**
+     * The suffix of the player's listing in the player list.
+     */
+    var playerListSuffix: TextComponent?
 
     /**
      * Send a message to the player.

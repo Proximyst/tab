@@ -5,6 +5,7 @@ dependencies {
     val kyoriTextVersion = "3.0.3"
     api("net.kyori:text-api:$kyoriTextVersion")
     api("net.kyori:text-serializer-gson:$kyoriTextVersion")
+    api("net.kyori:text-serializer-legacy:$kyoriTextVersion")
 
     api(kotlin("stdlib-jdk8"))
     api(kotlin("reflect"))
