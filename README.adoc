@@ -58,3 +58,17 @@ repositories {
     }
 }
 ----
+
+== FAQ
+
+These are a few perhaps commonly asked questions.
+
+=== Can I use this?
+
+No. It's still very much a work in progress and is in no state for use in
+production.
+
+=== Why is the licence header is missing in X & Y?
+
+The licence header is only updated (`:licenseFormat` task) right before a tag.
+If a tag has not been pushed recently, that would be the reason why.
