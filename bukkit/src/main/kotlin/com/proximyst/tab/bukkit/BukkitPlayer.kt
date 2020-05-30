@@ -2,7 +2,10 @@ package com.proximyst.tab.bukkit
 
 import com.proximyst.tab.common.ITabPlayer
 import net.kyori.text.Component
+import net.kyori.text.TextComponent
 import net.kyori.text.serializer.gson.GsonComponentSerializer
+import net.kyori.text.serializer.legacy.LegacyComponentSerializer
+import org.bukkit.ChatColor
 import org.bukkit.entity.Player
 import java.util.*
 
@@ -19,9 +22,12 @@ class BukkitPlayer(override val platformPlayer: Player) : ITabPlayer<Player> {
     override val uniqueId: UUID
         get() = platformPlayer.uniqueId
 
-    override var playerListName: String
-        get() = platformPlayer.playerListName
-        set(value) = platformPlayer.setPlayerListName(value.ifEmpty { null })
+    override var playerListName: TextComponent
+        get() = LegacyComponentSerializer.legacy().deserialize(platformPlayer.playerListName, ChatColor.COLOR_CHAR)
+        set(value) = platformPlayer.setPlayerListName(
+            if (value.isEmpty) null
+            else LegacyComponentSerializer.legacy().serialize(value, ChatColor.COLOR_CHAR)
+        )
 
     override fun sendMessage(text: Component) =
         platformPlayer.sendRawMessage(GsonComponentSerializer.INSTANCE.serialize(text))
