@@ -19,7 +19,7 @@ class TabPlugin : JavaPlugin(), ITabPlatform<BukkitPlatform> {
     override lateinit var tomlConfig: TomlConfiguration<ITabPlatform<BukkitPlatform>>
         private set
 
-    override val platform = BukkitPlatform(Bukkit.getServer(), this)
+    override val platform = BukkitPlatform(Bukkit.getServer())
 
     override fun onEnable() {
         tomlConfig = TomlConfiguration(this, File(dataFolder, "config.toml"), "config.toml")
