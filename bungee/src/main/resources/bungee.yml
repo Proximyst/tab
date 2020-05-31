@@ -1,0 +1,4 @@
+name: Tab
+version: "@VERSION@"
+main: com.proximyst.tab.bungee.TabPlugin
+description: Tab plugin with ease in mind.
