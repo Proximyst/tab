@@ -5,6 +5,7 @@ import com.proximyst.tab.common.handler.HeaderFooterHandler
 import com.proximyst.tab.common.handler.PlayerNameHandler
 import com.proximyst.tab.common.model.TabGroup
 import java.util.*
+import java.util.concurrent.ConcurrentHashMap
 
 class PlatformTranscendingPlugin<
         InternalPlayer : Any,
@@ -18,7 +19,7 @@ class PlatformTranscendingPlugin<
     headerFooterConfig: HeaderFooterConfig,
     groups: List<TabGroup>
 ) {
-    val playerCache = mutableMapOf<UUID, Player>()
+    val playerCache = ConcurrentHashMap<UUID, Player>()
     private val headerFooterHandler = HeaderFooterHandler(headerFooterConfig, platformImpl.platform.placeholderApi)
     private val playerNameHandler = PlayerNameHandler(groups, platformImpl.platform.placeholderApi)
 
