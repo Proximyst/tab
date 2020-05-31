@@ -54,12 +54,18 @@ refresh-interval = 50
 
 # Settings of groups to use for tab.
 #
+# Removing a value altogether results in it being handed off to the next lower
+# weight group that has the property. If you set a value to be blank, it will
+# not do so, but will also have no functionality, meaning you can wipe parts by
+# setting them blank, and inherit others by not specifying them at all.
+#
 # Type: Array of groups
 [[groups]]
 # The name of the group.
 # This is used in the permission node, `tab.groups.<name>`
 #
 # Type: String
+# This is required for the plugin to be functioning.
 name = "test"
 
 # The weight of the group.
@@ -89,3 +95,10 @@ suffix = "&c Lol"
 #
 # Type: String
 player-name = "&c%player_name%"
+
+# The ordering of the group.
+# A higher ordering means lower in the player list.
+#
+# Type: Integer
+# Max value: 99999 - values over this are *permitted* but will NOT *work*
+order = 0

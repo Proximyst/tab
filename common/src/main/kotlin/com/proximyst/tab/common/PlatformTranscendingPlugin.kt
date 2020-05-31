@@ -19,7 +19,7 @@ package com.proximyst.tab.common
 
 import com.proximyst.tab.common.config.commonvalues.HeaderFooterConfig
 import com.proximyst.tab.common.handler.HeaderFooterHandler
-import com.proximyst.tab.common.handler.PlayerNameHandler
+import com.proximyst.tab.common.handler.PlayerListHandler
 import com.proximyst.tab.common.model.TabGroup
 import java.util.*
 import java.util.concurrent.ConcurrentHashMap
@@ -36,8 +36,8 @@ class PlatformTranscendingPlugin<
     configurationProvider: ConfigurationProvider
 ) {
     val playerCache = ConcurrentHashMap<UUID, Player>()
-    private val headerFooterHandler = HeaderFooterHandler(configurationProvider, platformImpl.platform.placeholderApi)
-    private val playerNameHandler = PlayerNameHandler(configurationProvider, platformImpl.platform.placeholderApi)
+    val headerFooterHandler = HeaderFooterHandler(configurationProvider, platformImpl.platform.placeholderApi)
+    val playerNameHandler = PlayerListHandler(configurationProvider, platformImpl.platform.placeholderApi)
 
     fun enable() {
         // Ensure all `ITabPlayer`s are created and ready.

@@ -22,25 +22,38 @@ import net.kyori.text.Component
 import net.kyori.text.TextComponent
 import net.kyori.text.serializer.gson.GsonComponentSerializer
 import net.kyori.text.serializer.legacy.LegacyComponentSerializer
+import org.bukkit.Bukkit
 import org.bukkit.ChatColor
 import org.bukkit.entity.Player
 import org.bukkit.scoreboard.Team
 import java.util.*
+import java.util.concurrent.locks.ReentrantLock
+import kotlin.concurrent.withLock
 
 class BukkitPlayer(override val platformPlayer: Player, private val main: TabPlugin) : ITabPlayer<Player> {
-    private val team: Team = run {
-        val teamName = "TAB_${uniqueId.hashCode()}"
-        platformPlayer.scoreboard.getTeam(teamName)?.unregister() // Might already exist.
-        platformPlayer.scoreboard.registerNewTeam(teamName).also {
-            it.addEntry(name)
+    companion object {
+        internal val orderTeams = mutableMapOf<Int, Team>()
+        private val lock = ReentrantLock()
+
+        private fun createOrderTeam(order: Int): Team {
+            return lock.withLock {
+                orderTeams.computeIfAbsent(order) {
+                    val name = "TAB_ORD_${it.toString().padStart(5, '0')}"
+                    Bukkit.getScoreboardManager().mainScoreboard.getTeam(name)?.unregister()
+                    Bukkit.getScoreboardManager().mainScoreboard.registerNewTeam(name)
+                }
+            }
         }
     }
 
     override fun cleanup() {
-        try {
-            team.unregister()
-        } catch (ignored: IllegalStateException) {
-            main.logger.warning("The team for $name was already unregistered!")
+        val orderTeam = orderTeams[order]
+        orderTeam?.removeEntry(name)
+        if (orderTeam != null && orderTeam.entries.isEmpty()) {
+            runCatching {
+                orderTeam.unregister()
+                orderTeams.remove(order)
+            }.onFailure { it.printStackTrace() }
         }
     }
 
@@ -63,24 +76,14 @@ class BukkitPlayer(override val platformPlayer: Player, private val main: TabPlu
             else LegacyComponentSerializer.legacy().serialize(value, ChatColor.COLOR_CHAR)
         )
 
-    override var playerListPrefix: TextComponent?
-        get() = team.prefix.ifEmpty { null }
-            ?.let { LegacyComponentSerializer.legacy().deserialize(it, ChatColor.COLOR_CHAR) }
+    override var playerListPrefix: TextComponent? = null
         set(value) {
-            if (value != null && !value.isEmpty)
-                team.prefix = LegacyComponentSerializer.legacy().serialize(value, ChatColor.COLOR_CHAR)
-            else
-                team.prefix = ""
+            field = value?.takeUnless { it.isEmpty } ?: TextComponent.empty()
         }
 
-    override var playerListSuffix: TextComponent?
-        get() = team.suffix.ifEmpty { null }
-            ?.let { LegacyComponentSerializer.legacy().deserialize(it, ChatColor.COLOR_CHAR) }
+    override var playerListSuffix: TextComponent? = null
         set(value) {
-            if (value != null && !value.isEmpty)
-                team.suffix = LegacyComponentSerializer.legacy().serialize(value, ChatColor.COLOR_CHAR)
-            else
-                team.suffix = ""
+            field = value?.takeUnless { it.isEmpty } ?: TextComponent.empty()
         }
 
     override var playerListHeader: TextComponent?
@@ -103,6 +106,24 @@ class BukkitPlayer(override val platformPlayer: Player, private val main: TabPlu
                     LegacyComponentSerializer.legacy().serialize(value, ChatColor.COLOR_CHAR)
             else
                 platformPlayer.playerListFooter = null
+        }
+
+    override var order: Int = 0
+        set(value) {
+            if (value != field) {
+                val oldTeam = orderTeams[field]
+                oldTeam?.removeEntry(name)
+                if (oldTeam != null && oldTeam.entries.isEmpty()) {
+                    runCatching {
+                        oldTeam.unregister()
+                        orderTeams.remove(field)
+                    }.onFailure { it.printStackTrace() }
+                }
+            }
+            field = value
+            val team = createOrderTeam(value)
+            if (!team.hasEntry(name))
+                team.addEntry(name)
         }
 
     override fun sendMessage(text: Component) =

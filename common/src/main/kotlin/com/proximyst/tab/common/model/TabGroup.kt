@@ -41,6 +41,14 @@ data class TabGroup @JvmOverloads constructor(
     val weight: Int = 0,
 
     /**
+     * The ordering of the group.
+     *
+     * A higher ordering means lower in the player list. If one wants higher
+     * number means higher in the list, making all the values negative will work.
+     */
+    val order: Int? = null,
+
+    /**
      * The prefix to use for the group.
      */
     val prefix: String? = null,

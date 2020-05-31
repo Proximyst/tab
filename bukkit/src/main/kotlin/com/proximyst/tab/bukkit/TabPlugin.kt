@@ -33,6 +33,7 @@ import org.bukkit.entity.Player
 import org.bukkit.event.HandlerList
 import org.bukkit.plugin.java.JavaPlugin
 import org.bukkit.scheduler.BukkitRunnable
+import org.bukkit.scoreboard.Scoreboard
 import java.io.File
 import java.io.InputStream
 
@@ -53,12 +54,15 @@ class TabPlugin : JavaPlugin(), ITabPlatform<BukkitPlatform> {
             >
         private set
 
+    lateinit var pluginScoreboard: Scoreboard
+        private set
     private val headerFooter: HeaderFooterConfig by config<HeaderFooterConfig>()
     internal lateinit var groups: List<TabGroup>
     private val groupSettings: GroupConfig by config<GroupConfig>()
     private val placeholderApiSettings: PlaceholderApiConfig by config<PlaceholderApiConfig>("placeholderapi")
 
     override fun onEnable() {
+        BukkitPlayer.orderTeams.clear()
         tomlConfig = TomlConfiguration(this, File(dataFolder, "config.toml"), "config.toml")
 
         if (placeholderApiSettings.pluginMessaging == true) {
@@ -72,6 +76,8 @@ class TabPlugin : JavaPlugin(), ITabPlatform<BukkitPlatform> {
             server.messenger.registerOutgoingPluginChannel(this, "tab:placeholderapi")
             return
         }
+
+        pluginScoreboard = server.scoreboardManager.newScoreboard
 
         groups = tomlConfig.toml.getTables("groups").map {
             @Suppress("RemoveExplicitTypeArguments") // kotlinc erred.

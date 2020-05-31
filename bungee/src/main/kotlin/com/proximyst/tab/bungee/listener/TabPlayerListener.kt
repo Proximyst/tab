@@ -28,11 +28,11 @@ import net.md_5.bungee.event.EventHandler
 class TabPlayerListener(private val main: TabPlugin): Listener {
     @EventHandler
     fun registerPlayer(event: PostLoginEvent) {
-        main.platformTranscendingPlugin.joinedPlayer(
-            main.platformTranscendingPlugin.playerCache.computeIfAbsent(event.player.uniqueId) {
+        val tabPlayer = main.platformTranscendingPlugin.playerCache.computeIfAbsent(event.player.uniqueId) {
                 BungeePlayer(event.player)
             }
-        )
+        tabPlayer.sendOrderTeams()
+        main.platformTranscendingPlugin.joinedPlayer(tabPlayer)
     }
 
     @EventHandler

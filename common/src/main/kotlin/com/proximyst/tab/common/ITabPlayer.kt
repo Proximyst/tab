@@ -74,6 +74,12 @@ interface ITabPlayer<P : Any> {
     var playerListFooter: TextComponent?
 
     /**
+     * The ordering of the player in the player list, as decided by the player's
+     * personal group results.
+     */
+    var order: Int
+
+    /**
      * Send a message to the player.
      *
      * @param text The text to send to the player.

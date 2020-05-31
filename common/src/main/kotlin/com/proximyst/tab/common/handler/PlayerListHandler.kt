@@ -24,7 +24,7 @@ import com.proximyst.tab.common.ext.createComponentWithPlaceholders
 import com.proximyst.tab.common.model.TabGroup
 import net.kyori.text.TextComponent
 
-class PlayerNameHandler<Player : ITabPlayer<*>, PlaceholderApi : IPlaceholderApi<Player>>(
+class PlayerListHandler<Player : ITabPlayer<*>, PlaceholderApi : IPlaceholderApi<Player>>(
     private val configurationProvider: PlatformTranscendingPlugin.ConfigurationProvider,
     private val placeholderApi: PlaceholderApi?
 ) {
@@ -36,18 +36,18 @@ class PlayerNameHandler<Player : ITabPlayer<*>, PlaceholderApi : IPlaceholderApi
         val prefix = personalGroup.prefix?.ifEmpty { null }?.createComponentWithPlaceholders(player, placeholderApi)
         val suffix = personalGroup.suffix?.ifEmpty { null }?.createComponentWithPlaceholders(player, placeholderApi)
         val name = personalGroup.playerName?.ifEmpty { null }
-            ?.createComponentWithPlaceholders(player, placeholderApi) ?: TextComponent.empty()
+            ?.createComponentWithPlaceholders(player, placeholderApi) ?: TextComponent.of(player.name)
 
-        if (name.isEmpty) {
-            player.playerListName = name
-            player.playerListPrefix = prefix
-            player.playerListSuffix = suffix
-        } else {
+        if (prefix?.isEmpty == false || suffix?.isEmpty == false)
             player.playerListName = TextComponent.make {
                 if (prefix != null) it.append(prefix)
                 it.append(name)
                 if (suffix != null) it.append(suffix)
             }
+
+        val order = personalGroup.order ?: 0
+        if (player.order != order) {
+            player.order = order
         }
     }
 
@@ -60,6 +60,8 @@ class PlayerNameHandler<Player : ITabPlayer<*>, PlaceholderApi : IPlaceholderApi
                 group = group.copy(suffix = g.suffix)
             if (group.playerName == null && g.playerName != null)
                 group = group.copy(playerName = g.playerName)
+            if (group.order == null && g.order != null)
+                group = group.copy(order = g.order)
         }
         return group
     }
