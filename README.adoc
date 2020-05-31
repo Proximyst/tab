@@ -2,7 +2,7 @@
 
 image::https://drone.proximyst.com/api/badges/Proximyst/tab/status.svg[link="https://drone.proximyst.com/Proximyst/tab"]
 
-A work-in-progress tab manipulation plugin with ease in mind.
+A tab manipulation plugin with ease in mind.
 
 == Build
 
@@ -65,8 +65,8 @@ These are a few perhaps commonly asked questions.
 
 === Can I use this?
 
-No. It's still very much a work in progress and is in no state for use in
-production.
+Perhaps. You should probably still hold off, as it's not a set-in-stone
+product, but it does _work_ and is _usable_.
 
 === Why is the licence header is missing in X & Y?
 
