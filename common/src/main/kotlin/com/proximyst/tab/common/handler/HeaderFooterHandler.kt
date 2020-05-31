@@ -2,16 +2,17 @@ package com.proximyst.tab.common.handler
 
 import com.proximyst.tab.common.IPlaceholderApi
 import com.proximyst.tab.common.ITabPlayer
-import com.proximyst.tab.common.config.commonvalues.HeaderFooterConfig
+import com.proximyst.tab.common.PlatformTranscendingPlugin
 import net.kyori.text.TextComponent
 import net.kyori.text.serializer.legacy.LegacyComponentSerializer
 
 class HeaderFooterHandler<Player : ITabPlayer<*>, PlaceholderApi : IPlaceholderApi<Player>>(
-    private val headerFooterConfig: HeaderFooterConfig,
+    private val configurationProvider: PlatformTranscendingPlugin.ConfigurationProvider,
     private val placeholderApi: PlaceholderApi?
 ) {
     fun apply(player: Player) {
-        if (!headerFooterConfig.enabled) return
+        val config = configurationProvider.headerFooterConfig
+        if (!config.enabled) return
         fun createComponent(list: List<String>?) =
             list?.ifEmpty { null }
                 ?.map {
@@ -28,7 +29,7 @@ class HeaderFooterHandler<Player : ITabPlayer<*>, PlaceholderApi : IPlaceholderA
                     }
                 }
 
-        createComponent(headerFooterConfig.header)?.let { player.playerListHeader = it }
-        createComponent(headerFooterConfig.footer)?.let { player.playerListFooter = it }
+        createComponent(config.header)?.let { player.playerListHeader = it }
+        createComponent(config.footer)?.let { player.playerListFooter = it }
     }
 }

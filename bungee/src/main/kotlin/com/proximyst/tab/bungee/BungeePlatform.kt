@@ -9,7 +9,12 @@ import java.util.*
 
 class BungeePlatform(override val platform: ProxyServer) :
     IPlatform<ProxyServer, ProxiedPlayer, BungeePlayer, BungeePlaceholderApi> {
-    override val placeholderApi: BungeePlaceholderApi? = null
+    private val placeholderApiDelegate by lazy {
+        if (TabPlugin.instance.placeholderApiSettings.pluginMessaging == true) BungeePlaceholderApi()
+        else null
+    }
+    override val placeholderApi: BungeePlaceholderApi?
+        get() = placeholderApiDelegate
 
     override val onlinePlayers: Collection<BungeePlayer>
         get() = platform.players.map(ProxiedPlayer::tabPlayer)

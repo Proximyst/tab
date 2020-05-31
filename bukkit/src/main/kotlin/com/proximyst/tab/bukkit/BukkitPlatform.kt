@@ -9,7 +9,7 @@ import java.util.*
 
 class BukkitPlatform(override val platform: Server) : IPlatform<Server, Player, BukkitPlayer, BukkitPlaceholderApi> {
     override val placeholderApi: BukkitPlaceholderApi? =
-        if (platform.pluginManager.isPluginEnabled("PlaceholderAPI")) BukkitPlaceholderApi()
+        if (platform.pluginManager.getPlugin("PlaceholderAPI") != null) BukkitPlaceholderApi()
         else null
 
     override val onlinePlayers: Collection<BukkitPlayer>

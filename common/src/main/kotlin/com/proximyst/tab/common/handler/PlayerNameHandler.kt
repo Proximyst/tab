@@ -2,15 +2,17 @@ package com.proximyst.tab.common.handler
 
 import com.proximyst.tab.common.IPlaceholderApi
 import com.proximyst.tab.common.ITabPlayer
+import com.proximyst.tab.common.PlatformTranscendingPlugin
 import com.proximyst.tab.common.ext.createComponentWithPlaceholders
 import com.proximyst.tab.common.model.TabGroup
 import net.kyori.text.TextComponent
 
 class PlayerNameHandler<Player : ITabPlayer<*>, PlaceholderApi : IPlaceholderApi<Player>>(
-    private val groups: List<TabGroup>,
+    private val configurationProvider: PlatformTranscendingPlugin.ConfigurationProvider,
     private val placeholderApi: PlaceholderApi?
 ) {
     fun apply(player: Player) {
+        val groups = configurationProvider.groups
         val applicableGroups = player.filterApplicableGroups(groups)
         val personalGroup = createPersonalGroup(applicableGroups)
 

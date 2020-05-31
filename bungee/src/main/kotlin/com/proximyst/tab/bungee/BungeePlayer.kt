@@ -10,8 +10,11 @@ import net.md_5.bungee.protocol.packet.Chat
 import net.md_5.bungee.protocol.packet.PlayerListHeaderFooter
 import net.md_5.bungee.protocol.packet.PlayerListItem
 import java.util.*
+import java.util.concurrent.ConcurrentHashMap
 
 class BungeePlayer(override val platformPlayer: ProxiedPlayer) : ITabPlayer<ProxiedPlayer> {
+    val cachedPlaceholders = ConcurrentHashMap<String, String>()
+
     override val isConnected: Boolean
         get() = platformPlayer.isConnected
 
@@ -64,7 +67,7 @@ class BungeePlayer(override val platformPlayer: ProxiedPlayer) : ITabPlayer<Prox
     override fun cleanup() {
     }
 
-    private fun updateTabHeaderFooter() {
+    internal fun updateTabHeaderFooter() {
         platformPlayer.unsafe().sendPacket(PlayerListHeaderFooter().also {
             it.header = GsonComponentSerializer.INSTANCE
                 .serialize(playerListHeader?.takeUnless { it.isEmpty } ?: TextComponent.empty())
@@ -73,7 +76,7 @@ class BungeePlayer(override val platformPlayer: ProxiedPlayer) : ITabPlayer<Prox
         })
     }
 
-    private fun updateDisplayName() {
+    internal fun updateDisplayName() {
         val name = TextComponent.make {
             val prefix = playerListPrefix
             if (prefix != null && !prefix.isEmpty)

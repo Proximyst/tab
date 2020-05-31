@@ -1,3 +1,15 @@
+# Settings regarding PlaceholderAPI.
+#
+# Type: Table of properties
+[placeholderapi]
+# Whether placeholders should be synchronised with plugin messages.
+# This also needs to be set on the Bukkit plugin.
+# This disables all features on the Bukkit plugin.
+#
+# Type: Boolean
+# Default: true
+plugin-messaging = true
+
 # Settings regarding header & footer for players.
 #
 # Type: Table of properties

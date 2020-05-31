@@ -16,12 +16,11 @@ class PlatformTranscendingPlugin<
         Plugin : ITabPlatform<Platform>
         >(
     private val platformImpl: Plugin,
-    headerFooterConfig: HeaderFooterConfig,
-    groups: List<TabGroup>
+    configurationProvider: ConfigurationProvider
 ) {
     val playerCache = ConcurrentHashMap<UUID, Player>()
-    private val headerFooterHandler = HeaderFooterHandler(headerFooterConfig, platformImpl.platform.placeholderApi)
-    private val playerNameHandler = PlayerNameHandler(groups, platformImpl.platform.placeholderApi)
+    private val headerFooterHandler = HeaderFooterHandler(configurationProvider, platformImpl.platform.placeholderApi)
+    private val playerNameHandler = PlayerNameHandler(configurationProvider, platformImpl.platform.placeholderApi)
 
     fun enable() {
         // Ensure all `ITabPlayer`s are created and ready.
@@ -51,5 +50,10 @@ class PlatformTranscendingPlugin<
     fun quitPlayer(player: Player) {
         player.cleanup()
         playerCache.remove(player.uniqueId)
+    }
+
+    interface ConfigurationProvider {
+        val headerFooterConfig: HeaderFooterConfig
+        val groups: List<TabGroup>
     }
 }

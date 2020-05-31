@@ -1,11 +1,13 @@
 package com.proximyst.tab.bungee
 
+import com.proximyst.tab.bungee.command.BTabCommand
 import com.proximyst.tab.bungee.platform.BungeePlaceholderApi
 import com.proximyst.tab.common.ITabPlatform
 import com.proximyst.tab.common.PlatformTranscendingPlugin
 import com.proximyst.tab.common.config.TomlConfiguration
 import com.proximyst.tab.common.config.commonvalues.GroupConfig
 import com.proximyst.tab.common.config.commonvalues.HeaderFooterConfig
+import com.proximyst.tab.common.config.commonvalues.PlaceholderApiConfig
 import com.proximyst.tab.common.config.config
 import com.proximyst.tab.common.model.TabGroup
 import net.md_5.bungee.api.ProxyServer
@@ -26,8 +28,12 @@ class TabPlugin : Plugin(), ITabPlatform<BungeePlatform> {
         instance = this
     }
 
-    private val headerFooter: HeaderFooterConfig by config<HeaderFooterConfig>()
+    internal var headerFooterConfigDelegate = config<HeaderFooterConfig>("header-footer")
+    private val headerFooter: HeaderFooterConfig
+        get() = headerFooterConfigDelegate.getValue(this, this::headerFooter)
+    internal lateinit var groups: List<TabGroup>
     private val groupSettings: GroupConfig by config<GroupConfig>()
+    internal val placeholderApiSettings: PlaceholderApiConfig by config<PlaceholderApiConfig>("placeholderapi")
 
     lateinit var platformTranscendingPlugin: PlatformTranscendingPlugin<
             ProxiedPlayer,
@@ -41,12 +47,18 @@ class TabPlugin : Plugin(), ITabPlatform<BungeePlatform> {
     override fun onEnable() {
         tomlConfig = TomlConfiguration(this, File(dataFolder, "config.toml"), "config.toml")
 
+        groups = tomlConfig.toml.getTables("groups").map {
+            @Suppress("RemoveExplicitTypeArguments") // kotlinc erred.
+            it.to<TabGroup>()
+        }
+
         platformTranscendingPlugin = PlatformTranscendingPlugin(
             this,
-            headerFooter,
-            tomlConfig.toml.getTables("groups").map {
-                @Suppress("RemoveExplicitTypeArguments") // kotlinc erred.
-                it.to<TabGroup>()
+            object : PlatformTranscendingPlugin.ConfigurationProvider {
+                override val groups: List<TabGroup>
+                    get() = this@TabPlugin.groups
+                override val headerFooterConfig: HeaderFooterConfig
+                    get() = this@TabPlugin.headerFooter
             }
         )
         platformTranscendingPlugin.enable()
@@ -69,10 +81,16 @@ class TabPlugin : Plugin(), ITabPlatform<BungeePlatform> {
                 TimeUnit.MILLISECONDS
             )
         }
+        if (platform.placeholderApi != null) {
+            proxy.registerChannel("tab:placeholderapi")
+            proxy.pluginManager.registerListener(this, platform.placeholderApi)
+        }
+        proxy.pluginManager.registerCommand(this, BTabCommand(this))
     }
 
     override fun onDisable() {
         proxy.pluginManager.unregisterListeners(this)
+        proxy.pluginManager.unregisterCommands(this)
         platformTranscendingPlugin.disable()
     }
 
