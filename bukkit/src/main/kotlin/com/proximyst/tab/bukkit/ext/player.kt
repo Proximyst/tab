@@ -21,10 +21,14 @@ import com.proximyst.tab.bukkit.BukkitPlayer
 import com.proximyst.tab.bukkit.TabPlugin
 import org.bukkit.entity.Player
 
+/**
+ * Get the [BukkitPlayer] associated with this player, or create it if it isn't
+ * already available.
+ */
 val Player.tabPlayer: BukkitPlayer
-    get() = TabPlugin.instance.platformTranscendingPlugin.playerCache.computeIfAbsent(uniqueId) {
-        BukkitPlayer(
-            this@tabPlayer,
-            TabPlugin.instance
-        )
-    }
+    get() = TabPlugin.instance.platformTranscendingPlugin.playerCache
+        .computeIfAbsent(uniqueId) {
+            BukkitPlayer(
+                this@tabPlayer
+            )
+        }

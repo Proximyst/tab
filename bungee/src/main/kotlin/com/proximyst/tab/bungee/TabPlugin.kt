@@ -52,6 +52,11 @@ class TabPlugin : Plugin(), ITabPlatform<BungeePlatform> {
     private val groupSettings: GroupConfig by config<GroupConfig>()
     internal val placeholderApiSettings: PlaceholderApiConfig by config<PlaceholderApiConfig>("placeholderapi")
 
+    /**
+     * The [PlatformTranscendingPlugin] instance.
+     *
+     * Unlike on Bukkit, this is always set.
+     */
     lateinit var platformTranscendingPlugin: PlatformTranscendingPlugin<
             ProxiedPlayer,
             BungeePlayer,
@@ -64,6 +69,9 @@ class TabPlugin : Plugin(), ITabPlatform<BungeePlatform> {
     override fun onEnable() {
         tomlConfig = TomlConfiguration(this, File(dataFolder, "config.toml"), "config.toml")
 
+        // Read groups as an array of tables (`[[groups]]`).
+        // This cannot be done via delegates due to a limitation of my
+        // implementation of delegated configuration values.
         groups = tomlConfig.toml.getTables("groups").map {
             @Suppress("RemoveExplicitTypeArguments") // kotlinc erred.
             it.to<TabGroup>()
@@ -92,16 +100,18 @@ class TabPlugin : Plugin(), ITabPlatform<BungeePlatform> {
         groupSettings.refreshInterval?.also { interval ->
             proxy.scheduler.schedule(
                 this,
-                platformTranscendingPlugin::refreshPlayerNames,
+                platformTranscendingPlugin::refreshPlayerListData,
                 interval,
                 interval,
                 TimeUnit.MILLISECONDS
             )
         }
+
         if (platform.placeholderApi != null) {
             proxy.registerChannel("tab:placeholderapi")
             proxy.pluginManager.registerListener(this, platform.placeholderApi)
         }
+
         proxy.pluginManager.registerCommand(this, BTabCommand(this))
     }
 

@@ -20,17 +20,23 @@ package com.proximyst.tab.bungee.ext
 import net.md_5.bungee.api.score.Team
 import net.md_5.bungee.protocol.packet.Team as TeamPacket
 
+/**
+ * Create a new [TeamPacket] from this [Team] which creates a new team in the
+ * client.
+ */
 fun Team.toCreationPacket(): TeamPacket {
+    // For some reason, the lombok abusers did not find a builder to be sensible.
     val packet = TeamPacket()
-    packet.mode = 0
+    packet.mode = 0 // 0 = create new team
     packet.name = name
+    // Display name has to be the same as the actual name if one is not provided.
     packet.displayName = displayName ?: "{\"text\":\"${name.replace("\"", "\\\"")}\"}"
     packet.collisionRule = collisionRule ?: "always"
     packet.color = color
     packet.friendlyFire = friendlyFire
     packet.nameTagVisibility = nameTagVisibility ?: "always"
-    packet.prefix = prefix ?: "{\"text\":\"\"}"
-    packet.suffix = suffix ?: "{\"text\":\"\"}"
+    packet.prefix = prefix ?: "{\"text\":\"\"}" // These have to be empty to not cause NPEs in BungeeCord
+    packet.suffix = suffix ?: "{\"text\":\"\"}" // These have to be empty to not cause NPEs in BungeeCord
     packet.players = players.toTypedArray()
     return packet
 }

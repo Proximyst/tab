@@ -24,8 +24,16 @@ import net.md_5.bungee.api.ProxyServer
 import net.md_5.bungee.api.connection.ProxiedPlayer
 import java.util.*
 
+/**
+ * The [IPlatform] implementation for BungeeCord.
+ *
+ * This provides [BungeePlayer]s and the [BungeePlaceholderApi] for use in
+ * common, platform-less code.
+ */
 class BungeePlatform(override val platform: ProxyServer) :
     IPlatform<ProxyServer, ProxiedPlayer, BungeePlayer, BungeePlaceholderApi> {
+    // This must not be handled upon instantiation of the main plugin class,
+    // therefore a lazy works fine as a hack.
     private val placeholderApiDelegate by lazy {
         if (TabPlugin.instance.placeholderApiSettings.pluginMessaging == true) BungeePlaceholderApi()
         else null

@@ -18,10 +18,12 @@
 package com.proximyst.tab.common
 
 import com.proximyst.tab.common.model.TabGroup
-import net.kyori.text.Component
 import net.kyori.text.TextComponent
 import java.util.*
 
+/**
+ * A player on any given platform and their values and properties.
+ */
 interface ITabPlayer<P : Any> {
     /**
      * The player object on the current platform.
@@ -42,11 +44,6 @@ interface ITabPlayer<P : Any> {
      * Whether the player is currently connected.
      */
     val isConnected: Boolean
-
-    /**
-     * The player's current ping as known by the platform.
-     */
-    val ping: Int
 
     /**
      * The name of the player in the player list.
@@ -80,20 +77,6 @@ interface ITabPlayer<P : Any> {
     var order: Int
 
     /**
-     * Send a message to the player.
-     *
-     * @param text The text to send to the player.
-     */
-    fun sendMessage(text: String) = sendMessage(TextComponent.of(text))
-
-    /**
-     * Send a message to the player.
-     *
-     * @param text The text to send to the player. This is completely untouched.
-     */
-    fun sendMessage(text: Component)
-
-    /**
      * Check whether the player has a permission node.
      *
      * @param permission The permission to check whether the player has.
@@ -103,7 +86,7 @@ interface ITabPlayer<P : Any> {
     /**
      * Do necessary cleanup for this player.
      */
-    fun cleanup()
+    fun cleanup() = Unit
 
     /**
      * Return which groups are applicable from a list of groups.

@@ -19,7 +19,20 @@ package com.proximyst.tab.common.pluginmessage
 
 import java.util.*
 
+/**
+ * A request for information on placeholders for a specific player.
+ *
+ * No response is actually expected, but a new request will be issued every time
+ * a placeholder is used.
+ */
 data class PlaceholderApiRequest(
+    /**
+     * The [UUID] of the player to whom the placeholders apply.
+     */
     val uuid: UUID,
+
+    /**
+     * The placeholders whose values are wanted an updated version of.
+     */
     val placeholders: List<String>
 )

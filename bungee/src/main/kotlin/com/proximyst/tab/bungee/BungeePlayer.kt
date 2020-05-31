@@ -19,23 +19,35 @@ package com.proximyst.tab.bungee
 
 import com.proximyst.tab.bungee.ext.toCreationPacket
 import com.proximyst.tab.common.ITabPlayer
-import net.kyori.text.Component
 import net.kyori.text.TextComponent
 import net.kyori.text.serializer.gson.GsonComponentSerializer
 import net.md_5.bungee.api.ProxyServer
 import net.md_5.bungee.api.connection.ProxiedPlayer
 import net.md_5.bungee.api.score.Team
-import net.md_5.bungee.protocol.packet.Chat
 import net.md_5.bungee.protocol.packet.PlayerListHeaderFooter
 import net.md_5.bungee.protocol.packet.PlayerListItem
 import java.util.*
 import java.util.concurrent.ConcurrentHashMap
 import net.md_5.bungee.protocol.packet.Team as TeamPacket
 
+/**
+ * The [ITabPlayer] implementation for BungeeCord with its [ProxiedPlayer].
+ *
+ * This handles all the behind-the-hood parts of a player on the BungeeCord
+ * platform.
+ */
 class BungeePlayer(override val platformPlayer: ProxiedPlayer) : ITabPlayer<ProxiedPlayer> {
     companion object {
+        /**
+         * The teams created for specific order levels.
+         */
         private val orderTeams = ConcurrentHashMap<Int, Team>()
 
+        /**
+         * Add a player to an order team.
+         *
+         * This will create and broadcast any team creations and modifications.
+         */
         private fun addPlayerToOrder(order: Int, playerName: String) {
             var hadToPut = false
             val team = orderTeams.computeIfAbsent(order) {
@@ -57,9 +69,15 @@ class BungeePlayer(override val platformPlayer: ProxiedPlayer) : ITabPlayer<Prox
             }
         }
 
+        /**
+         * Remove a player from an order team.
+         *
+         * This will create and broadcast any team removals and modifications.
+         */
         private fun removePlayerFromOrder(order: Int, playerName: String) {
             val team = orderTeams[order] ?: return // No such team exists.
             team.removePlayer(playerName)
+
             val packet = TeamPacket()
             packet.name = team.name
             if (team.players.isEmpty()) {
@@ -76,6 +94,14 @@ class BungeePlayer(override val platformPlayer: ProxiedPlayer) : ITabPlayer<Prox
         }
     }
 
+    /**
+     * All placeholders we already know of and their respective values.
+     *
+     * These are garbage collected when the player wrapper as a whole is.
+     *
+     * It is public to allow third-party plugins to hook in and provide
+     * alternate ways of assigning placeholders.
+     */
     val cachedPlaceholders = ConcurrentHashMap<String, String>()
 
     override val isConnected: Boolean
@@ -86,9 +112,6 @@ class BungeePlayer(override val platformPlayer: ProxiedPlayer) : ITabPlayer<Prox
 
     override val uniqueId: UUID
         get() = platformPlayer.uniqueId
-
-    override val ping: Int
-        get() = platformPlayer.ping
 
     override var playerListHeader: TextComponent? = null
         set(value) {
@@ -132,19 +155,18 @@ class BungeePlayer(override val platformPlayer: ProxiedPlayer) : ITabPlayer<Prox
     override fun hasPermission(permission: String): Boolean =
         platformPlayer.hasPermission(permission)
 
-    override fun sendMessage(text: Component) {
-        platformPlayer.unsafe().sendPacket(Chat(GsonComponentSerializer.INSTANCE.serialize(text)))
-    }
-
+    /**
+     * Sends a packet to the player with all the _existing_ order teams' data.
+     */
     fun sendOrderTeams() {
         orderTeams.forEach { (_, team) ->
             platformPlayer.unsafe().sendPacket(team.toCreationPacket())
         }
     }
 
-    override fun cleanup() {
-    }
-
+    /**
+     * Send a packet to the player with its header & footer data.
+     */
     internal fun updateTabHeaderFooter() {
         platformPlayer.unsafe().sendPacket(PlayerListHeaderFooter().also {
             it.header = GsonComponentSerializer.INSTANCE
@@ -154,16 +176,22 @@ class BungeePlayer(override val platformPlayer: ProxiedPlayer) : ITabPlayer<Prox
         })
     }
 
+    /**
+     * Send a packet to all players with this player's name in the player list.
+     */
     internal fun updateDisplayName() {
-        val name = TextComponent.make {
-            val prefix = playerListPrefix
+        val name = TextComponent.make { // Build text component to avoid teams.
+            val prefix = playerListPrefix // Can be mutated while reading.
             if (prefix != null && !prefix.isEmpty)
                 it.append(prefix)
+
             it.append(playerListName)
-            val suffix = playerListSuffix
+
+            val suffix = playerListSuffix // Can be mutated while reading.
             if (suffix != null && !suffix.isEmpty)
                 it.append(suffix)
         }
+
         val packet = PlayerListItem().also {
             it.action = PlayerListItem.Action.UPDATE_DISPLAY_NAME
             it.items = arrayOf(
@@ -173,6 +201,7 @@ class BungeePlayer(override val platformPlayer: ProxiedPlayer) : ITabPlayer<Prox
                 }
             )
         }
+
         for (p in ProxyServer.getInstance().players) {
             p.unsafe().sendPacket(packet)
         }

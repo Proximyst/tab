@@ -17,6 +17,18 @@
  */
 package com.proximyst.tab.common.config.commonvalues
 
+import com.proximyst.tab.common.IPlaceholderApi
+
+/**
+ * Configuration for the `[header-footer]` table.
+ */
 data class PlaceholderApiConfig(
+    /**
+     * Whether to use plugin messaging for the [IPlaceholderApi] implementation.
+     *
+     * On Bukkit, this will result in the plugin never doing anything more.
+     * On BungeeCord, the plugin will only start requesting and caching
+     * placeholders.
+     */
     val pluginMessaging: Boolean?
 )

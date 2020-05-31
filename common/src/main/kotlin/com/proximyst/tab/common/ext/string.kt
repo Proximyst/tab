@@ -19,9 +19,17 @@ package com.proximyst.tab.common.ext
 
 import com.proximyst.tab.common.IPlaceholderApi
 import com.proximyst.tab.common.ITabPlayer
+import net.kyori.text.Component
+import net.kyori.text.TextComponent
 import net.kyori.text.serializer.legacy.LegacyComponentSerializer
 
+/**
+ * Create a KyoriPowered/text [Component] out of a [String] and its placeholders
+ * with the given [Player] and [PlaceholderApi] instances.
+ *
+ * This also handles colour codes with the `&` character.
+ */
 fun <Player : ITabPlayer<*>, PlaceholderApi : IPlaceholderApi<Player>>
-        String.createComponentWithPlaceholders(player: Player, placeholderApi: PlaceholderApi?) =
+        String.createComponentWithPlaceholders(player: Player, placeholderApi: PlaceholderApi?): TextComponent =
     LegacyComponentSerializer.legacy()
         .deserialize(placeholderApi?.replacePlaceholders(player, this) ?: this, '&')

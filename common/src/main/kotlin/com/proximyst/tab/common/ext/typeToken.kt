@@ -19,5 +19,8 @@ package com.proximyst.tab.common.ext
 
 import com.google.gson.reflect.TypeToken
 
+/**
+ * Create a [TypeToken] out of type [T].
+ */
 @Suppress("UnstableApiUsage")
 inline fun <reified T : Any> typeToken(): TypeToken<T> = object : TypeToken<T>() {}

@@ -28,7 +28,17 @@ import org.bukkit.Bukkit
 import org.bukkit.entity.Player
 import org.bukkit.plugin.messaging.PluginMessageListener
 
+/**
+ * Implementation for [IPlaceholderApi] for the Bukkit platform.
+ *
+ * This hooks into the plugin through [PlaceholderAPI] and refers to it.
+ * This also handles plugin messages over the channel `tab:placeholderapi` of
+ * type [PlaceholderApiRequest] and responds with [PlaceholderApiResponse]s.
+ */
 class BukkitPlaceholderApi : IPlaceholderApi<BukkitPlayer>, PluginMessageListener {
+    /**
+     * A simple and non-lenient [Gson] instance.
+     */
     private val gson = Gson()
 
     override fun replacePlaceholders(player: BukkitPlayer, text: String): String {
@@ -36,20 +46,36 @@ class BukkitPlaceholderApi : IPlaceholderApi<BukkitPlayer>, PluginMessageListene
     }
 
     override fun onPluginMessageReceived(channel: String, _ignored: Player, message: ByteArray) {
-        if (channel != "tab:placeholderapi") return
+        if (channel != "tab:placeholderapi") return // Not ours to handle
+
         // A request for a player has come in!
         val json = String(message)
         val packet = gson.fromJson(json, PlaceholderApiRequest::class.java)
+
         val player = Bukkit.getPlayer(packet.uuid) ?: return // Not online (anymore?)
+
         val response = PlaceholderApiResponse(
             packet.uuid,
-            packet.placeholders.map {
-                it to PlaceholderAPI.setPlaceholders(player, it, false)
+            packet.placeholders.mapNotNull {
+                val value = PlaceholderAPI.setPlaceholders(
+                    player,
+                    it,
+                    // A placeholder might return colour codes, which we don't want altered.
+                    // We don't want them altered because we do so ourselves on the commons side
+                    // and altering would force us to do twice the work for the same result.
+                    false
+                )
+                if (value == it) return@mapNotNull null // There was no such placeholder; don't send extra.
+                it to value
             }.toMap()
         )
-        if (response.placeholders.isEmpty()) {
-            return // Nothing to send.
-        }
-        player.sendPluginMessage(TabPlugin.instance, "tab:placeholderapi", gson.toJson(response).toByteArray())
+
+        if (response.placeholders.isEmpty()) return // Nothing to send.
+
+        player.sendPluginMessage(
+            TabPlugin.instance,
+            "tab:placeholderapi",
+            gson.toJson(response).toByteArray()
+        )
     }
 }

@@ -17,6 +17,9 @@
  */
 package com.proximyst.tab.common.config.commonvalues
 
+/**
+ * Configuration for the `[group-settings]` table.
+ */
 data class GroupConfig(
     /**
      * How often the player groups should refresh.

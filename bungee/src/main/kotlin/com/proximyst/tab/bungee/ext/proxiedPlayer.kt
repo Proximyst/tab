@@ -21,7 +21,12 @@ import com.proximyst.tab.bungee.BungeePlayer
 import com.proximyst.tab.bungee.TabPlugin
 import net.md_5.bungee.api.connection.ProxiedPlayer
 
+/**
+ * Get the [BungeePlayer] associated with this player, or create it if it isn't
+ * already available.
+ */
 val ProxiedPlayer.tabPlayer: BungeePlayer
-    get() = TabPlugin.instance.platformTranscendingPlugin.playerCache.computeIfAbsent(uniqueId) {
-        BungeePlayer(this@tabPlayer)
-    }
+    get() = TabPlugin.instance.platformTranscendingPlugin.playerCache
+        .computeIfAbsent(uniqueId) {
+            BungeePlayer(this@tabPlayer)
+        }

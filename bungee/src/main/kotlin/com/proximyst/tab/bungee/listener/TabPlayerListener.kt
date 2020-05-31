@@ -17,26 +17,27 @@
  */
 package com.proximyst.tab.bungee.listener
 
-import com.proximyst.tab.bungee.BungeePlayer
 import com.proximyst.tab.bungee.TabPlugin
 import com.proximyst.tab.bungee.ext.tabPlayer
+import com.proximyst.tab.common.ITabPlayer
 import net.md_5.bungee.api.event.PlayerDisconnectEvent
 import net.md_5.bungee.api.event.PostLoginEvent
 import net.md_5.bungee.api.plugin.Listener
 import net.md_5.bungee.event.EventHandler
 
-class TabPlayerListener(private val main: TabPlugin): Listener {
+/**
+ * Listener for handling joining and leaving [ITabPlayer]s.
+ */
+class TabPlayerListener(private val main: TabPlugin) : Listener {
     @EventHandler
     fun registerPlayer(event: PostLoginEvent) {
-        val tabPlayer = main.platformTranscendingPlugin.playerCache.computeIfAbsent(event.player.uniqueId) {
-                BungeePlayer(event.player)
-            }
-        tabPlayer.sendOrderTeams()
+        val tabPlayer = event.player.tabPlayer // Caches automatically
+        tabPlayer.sendOrderTeams() // BungeeCord doesn't automatically send team information.
         main.platformTranscendingPlugin.joinedPlayer(tabPlayer)
     }
 
     @EventHandler
     fun unregisterPlayer(event: PlayerDisconnectEvent) {
-        main.platformTranscendingPlugin.quitPlayer(event.player.tabPlayer)
+        main.platformTranscendingPlugin.disconnectedPlayer(event.player.tabPlayer)
     }
 }

@@ -17,8 +17,15 @@
  */
 package com.proximyst.tab.common.config.commonvalues
 
+/**
+ * Configuration for the `[header-footer]` table.
+ */
 data class HeaderFooterConfig(
+    /**
+     * Whether the header & footer functionality should be used at all.
+     */
     val enabled: Boolean,
+
     /**
      * How often the header & footer should refresh.
      * Calling refresh is done by the platforms.
@@ -27,6 +34,18 @@ data class HeaderFooterConfig(
      * On BungeeCord, this is in milliseconds.
      */
     val refreshInterval: Long?,
+
+    /**
+     * The header to display to players.
+     *
+     * This can have placeholders and colour codes with `&`.
+     */
     val header: List<String>?,
+
+    /**
+     * The footer to display to players.
+     *
+     * This can have placeholders and colour codes with `&`.
+     */
     val footer: List<String>?
 )

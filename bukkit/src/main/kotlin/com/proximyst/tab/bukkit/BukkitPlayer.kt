@@ -18,43 +18,48 @@
 package com.proximyst.tab.bukkit
 
 import com.proximyst.tab.common.ITabPlayer
-import net.kyori.text.Component
 import net.kyori.text.TextComponent
-import net.kyori.text.serializer.gson.GsonComponentSerializer
 import net.kyori.text.serializer.legacy.LegacyComponentSerializer
 import org.bukkit.Bukkit
 import org.bukkit.ChatColor
 import org.bukkit.entity.Player
 import org.bukkit.scoreboard.Team
 import java.util.*
-import java.util.concurrent.locks.ReentrantLock
-import kotlin.concurrent.withLock
 
-class BukkitPlayer(override val platformPlayer: Player, private val main: TabPlugin) : ITabPlayer<Player> {
+/**
+ * The [ITabPlayer] implementation for Bukkit with its [Player].
+ *
+ * This handles all the behind-the-hood parts of a player on the Bukkit platform.
+ */
+class BukkitPlayer(override val platformPlayer: Player) : ITabPlayer<Player> {
     companion object {
-        internal val orderTeams = mutableMapOf<Int, Team>()
-        private val lock = ReentrantLock()
+        /**
+         * The teams created for specific order levels.
+         */
+        private val orderTeams = mutableMapOf<Int, Team>()
 
+        /**
+         * Create a new order team or get one which already exists.
+         *
+         * The order should be in `[0, 99999]`.
+         */
         private fun createOrderTeam(order: Int): Team {
-            return lock.withLock {
-                orderTeams.computeIfAbsent(order) {
-                    val name = "TAB_ORD_${it.toString().padStart(5, '0')}"
-                    Bukkit.getScoreboardManager().mainScoreboard.getTeam(name)?.unregister()
-                    Bukkit.getScoreboardManager().mainScoreboard.registerNewTeam(name)
+            return orderTeams.computeIfAbsent(order) {
+                val name = "TAB_ORD_${it.toString().padStart(5, '0')}"
+
+                Bukkit.getScoreboardManager().mainScoreboard.let { board ->
+                    // The team might already exist, so make sure it doesn't anymore.
+                    board.getTeam(name)?.unregister()
+
+                    // Create a new team now that we know there won't be an exception thrown.
+                    board.registerNewTeam(name)
                 }
             }
         }
     }
 
     override fun cleanup() {
-        val orderTeam = orderTeams[order]
-        orderTeam?.removeEntry(name)
-        if (orderTeam != null && orderTeam.entries.isEmpty()) {
-            runCatching {
-                orderTeam.unregister()
-                orderTeams.remove(order)
-            }.onFailure { it.printStackTrace() }
-        }
+        removeFromOrderTeam()
     }
 
     override val isConnected: Boolean
@@ -62,9 +67,6 @@ class BukkitPlayer(override val platformPlayer: Player, private val main: TabPlu
 
     override val name: String
         get() = platformPlayer.name
-
-    override val ping: Int
-        get() = platformPlayer.spigot().ping
 
     override val uniqueId: UUID
         get() = platformPlayer.uniqueId
@@ -108,26 +110,31 @@ class BukkitPlayer(override val platformPlayer: Player, private val main: TabPlu
                 platformPlayer.playerListFooter = null
         }
 
+    /**
+     * Remove the player from the current order team.
+     *
+     * If the team ends up empty, also remove the team altogether.
+     */
+    private fun removeFromOrderTeam() {
+        val ord = order
+        val team = orderTeams[ord] ?: return
+        team.removeEntry(name)
+        if (team.entries.isEmpty()) {
+            runCatching {
+                team.unregister()
+                orderTeams.remove(ord)
+            }
+        }
+    }
+
     override var order: Int = 0
         set(value) {
-            if (value != field) {
-                val oldTeam = orderTeams[field]
-                oldTeam?.removeEntry(name)
-                if (oldTeam != null && oldTeam.entries.isEmpty()) {
-                    runCatching {
-                        oldTeam.unregister()
-                        orderTeams.remove(field)
-                    }.onFailure { it.printStackTrace() }
-                }
-            }
+            if (value != field) removeFromOrderTeam()
             field = value
             val team = createOrderTeam(value)
             if (!team.hasEntry(name))
                 team.addEntry(name)
         }
-
-    override fun sendMessage(text: Component) =
-        platformPlayer.sendRawMessage(GsonComponentSerializer.INSTANCE.serialize(text))
 
     override fun hasPermission(permission: String): Boolean =
         platformPlayer.hasPermission(permission)

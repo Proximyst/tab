@@ -24,6 +24,12 @@ import org.bukkit.Server
 import org.bukkit.entity.Player
 import java.util.*
 
+/**
+ * The [IPlatform] implementation for Bukkit.
+ *
+ * This provides [BukkitPlayer]s and the [BukkitPlaceholderApi] for use in
+ * common, platform-less code.
+ */
 class BukkitPlatform(override val platform: Server) : IPlatform<Server, Player, BukkitPlayer, BukkitPlaceholderApi> {
     override val placeholderApi: BukkitPlaceholderApi? =
         if (platform.pluginManager.getPlugin("PlaceholderAPI") != null) BukkitPlaceholderApi()

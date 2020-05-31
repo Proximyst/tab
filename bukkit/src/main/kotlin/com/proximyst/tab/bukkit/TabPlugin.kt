@@ -33,7 +33,6 @@ import org.bukkit.entity.Player
 import org.bukkit.event.HandlerList
 import org.bukkit.plugin.java.JavaPlugin
 import org.bukkit.scheduler.BukkitRunnable
-import org.bukkit.scoreboard.Scoreboard
 import java.io.File
 import java.io.InputStream
 
@@ -44,6 +43,11 @@ class TabPlugin : JavaPlugin(), ITabPlatform<BukkitPlatform> {
         private set
     override val platform = BukkitPlatform(Bukkit.getServer())
 
+    /**
+     * The [PlatformTranscendingPlugin] instance.
+     *
+     * This does not get set if [PlaceholderApiConfig.pluginMessaging] is true.
+     */
     lateinit var platformTranscendingPlugin: PlatformTranscendingPlugin<
             Player,
             BukkitPlayer,
@@ -54,31 +58,33 @@ class TabPlugin : JavaPlugin(), ITabPlatform<BukkitPlatform> {
             >
         private set
 
-    lateinit var pluginScoreboard: Scoreboard
-        private set
     private val headerFooter: HeaderFooterConfig by config<HeaderFooterConfig>()
     internal lateinit var groups: List<TabGroup>
     private val groupSettings: GroupConfig by config<GroupConfig>()
     private val placeholderApiSettings: PlaceholderApiConfig by config<PlaceholderApiConfig>("placeholderapi")
 
     override fun onEnable() {
-        BukkitPlayer.orderTeams.clear()
         tomlConfig = TomlConfiguration(this, File(dataFolder, "config.toml"), "config.toml")
 
         if (placeholderApiSettings.pluginMessaging == true) {
             // The plugin should not function as usual!
+            // It is hereby only a location where placeholders are parsed and handled.
+
             if (platform.placeholderApi == null) {
                 logger.severe("Cannot enable plugin because PlaceholderAPI is not present and the plugin is configured for using it!")
                 isEnabled = false
                 return
             }
+
             server.messenger.registerIncomingPluginChannel(this, "tab:placeholderapi", platform.placeholderApi)
             server.messenger.registerOutgoingPluginChannel(this, "tab:placeholderapi")
+
             return
         }
 
-        pluginScoreboard = server.scoreboardManager.newScoreboard
-
+        // Read groups as an array of tables (`[[groups]]`).
+        // This cannot be done via delegates due to a limitation of my
+        // implementation of delegated configuration values.
         groups = tomlConfig.toml.getTables("groups").map {
             @Suppress("RemoveExplicitTypeArguments") // kotlinc erred.
             it.to<TabGroup>()
@@ -107,7 +113,7 @@ class TabPlugin : JavaPlugin(), ITabPlatform<BukkitPlatform> {
         groupSettings.refreshInterval?.also { interval ->
             object : BukkitRunnable() {
                 override fun run() {
-                    platformTranscendingPlugin.refreshPlayerNames()
+                    platformTranscendingPlugin.refreshPlayerListData()
                 }
             }.runTaskTimerAsynchronously(this, interval, interval)
         }
@@ -115,7 +121,7 @@ class TabPlugin : JavaPlugin(), ITabPlatform<BukkitPlatform> {
 
     override fun onDisable() {
         HandlerList.unregisterAll(this)
-        if (placeholderApiSettings.pluginMessaging != true)
+        if (placeholderApiSettings.pluginMessaging != true) // platformTranscendingPlugin is not set if this is true
             platformTranscendingPlugin.disable()
     }
 

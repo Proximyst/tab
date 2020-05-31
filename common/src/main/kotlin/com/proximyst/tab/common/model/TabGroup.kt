@@ -63,6 +63,12 @@ data class TabGroup @JvmOverloads constructor(
      */
     val playerName: String? = null
 ) {
+    /**
+     * The permission node of this [TabGroup].
+     *
+     * This is used to determine whether a player is included in a group.
+     */
     val permission: String
-        get() = "tab.groups.$name" // GSON does something funky.
+        // GSON does something funky and we must use a getter.
+        get() = "tab.groups.$name"
 }

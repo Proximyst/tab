@@ -26,9 +26,12 @@ import net.md_5.bungee.api.CommandSender
 import net.md_5.bungee.api.chat.ComponentBuilder
 import net.md_5.bungee.api.plugin.Command
 
+/**
+ * A command for reloading the plugin's data on BungeeCord.
+ */
 class BTabCommand(private val main: TabPlugin) : Command("btab", "tab.btab", "bungee-tab", "bungeetab") {
     override fun execute(sender: CommandSender, args: Array<out String>) {
-        if (args.isEmpty()) {
+        if (args.isEmpty()) { // No subcommand
             syntax(sender)
             return
         }
@@ -40,8 +43,12 @@ class BTabCommand(private val main: TabPlugin) : Command("btab", "tab.btab", "bu
     }
 
     private fun reload(sender: CommandSender) {
+        // Required; it doesn't read automatically:
         main.tomlConfig.reload()
+
+        // Required; the delegates caches values:
         main.headerFooterConfigDelegate = config<HeaderFooterConfig>("header-footer")
+
         main.groups = main.tomlConfig.toml.getTables("groups").map {
             @Suppress("RemoveExplicitTypeArguments") // kotlinc erred.
             it.to<TabGroup>()

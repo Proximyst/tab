@@ -17,6 +17,13 @@
  */
 package com.proximyst.tab.common
 
-interface IPlaceholderApi<P: ITabPlayer<*>> {
-    fun replacePlaceholders(player: P, text: String): String
+/**
+ * An API for handling placeholders on this platform for a given [Player] type.
+ */
+interface IPlaceholderApi<Player : ITabPlayer<*>> {
+    /**
+     * Replace the placeholders found in the given [text] for the [player] and
+     * return the resolved text.
+     */
+    fun replacePlaceholders(player: Player, text: String): String
 }
