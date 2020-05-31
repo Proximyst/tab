@@ -1,10 +1,18 @@
 # Settings regarding header & footer for players.
+#
+# Type: Table of properties
 [header-footer]
 # Whether header & footer should be displayed.
 #
 # Type: Boolean
 # Default: true
 enabled = true
+
+# How often it should refresh in ticks.
+# One tick is 50 ms.
+#
+# Type: Integer
+refresh-interval = 20
 
 # The header to display.
 # This can be empty ([]) for no header.
@@ -23,3 +31,51 @@ header = [
 footer = [
   "&9Wee!!",
 ]
+
+# Global settings for groups.
+#
+# Type: Table of properties
+[group-settings]
+# How often it should refresh in ticks.
+# One tick is 50 ms.
+#
+# Type: Integer
+refresh-interval = 20
+
+# Settings of groups to use for tab.
+#
+# Type: Array of groups
+[[groups]]
+# The name of the group.
+# This is used in the permission node, `tab.groups.<name>`
+#
+# Type: String
+name = "test"
+
+# The weight of the group.
+# Prefer unique values, as that will not cause any unpredicted behaviour.
+#
+# A higher value means its properties weigh in more, so a weight 10 wins over a
+# weight 5 on e.g. prefix. This then means it'll use the prefix of the weight 10
+# instead of the weight 5.
+#
+# Type: Integer
+weight = 30
+
+# The prefix to use for the player in the tab list.
+# This is limited to 64 characters if `player-name` is not set.
+#
+# Type: String
+prefix = "&aTest "
+
+# The suffix to use for the player in the tab list.
+# This is limited to 64 characters if `player-name` is not set.
+#
+# Type: String
+suffix = "&c Lol"
+
+# The name to use for the player in the tab list.
+# This is not limited by characters.
+#
+# Type: String
+player-name = "&c%player_name%"

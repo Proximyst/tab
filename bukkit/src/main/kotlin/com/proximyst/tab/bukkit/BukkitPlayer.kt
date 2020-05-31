@@ -1,6 +1,5 @@
 package com.proximyst.tab.bukkit
 
-import com.proximyst.tab.bukkit.platform.TabTeam
 import com.proximyst.tab.common.ITabPlayer
 import net.kyori.text.Component
 import net.kyori.text.TextComponent
@@ -8,10 +7,17 @@ import net.kyori.text.serializer.gson.GsonComponentSerializer
 import net.kyori.text.serializer.legacy.LegacyComponentSerializer
 import org.bukkit.ChatColor
 import org.bukkit.entity.Player
+import org.bukkit.scoreboard.Team
 import java.util.*
 
 class BukkitPlayer(override val platformPlayer: Player, private val main: TabPlugin) : ITabPlayer<Player> {
-    private val team = TabTeam(this)
+    private val team: Team = run {
+        val teamName = "TAB_${uniqueId.hashCode()}"
+        platformPlayer.scoreboard.getTeam(teamName)?.unregister() // Might already exist.
+        platformPlayer.scoreboard.registerNewTeam(teamName).also {
+            it.addEntry(name)
+        }
+    }
 
     override fun cleanup() {
         try {
@@ -44,42 +50,42 @@ class BukkitPlayer(override val platformPlayer: Player, private val main: TabPlu
         get() = team.prefix.ifEmpty { null }
             ?.let { LegacyComponentSerializer.legacy().deserialize(it, ChatColor.COLOR_CHAR) }
         set(value) {
-            if (value?.isEmpty != false)
-                team.prefix = ""
-            else
+            if (value != null && !value.isEmpty)
                 team.prefix = LegacyComponentSerializer.legacy().serialize(value, ChatColor.COLOR_CHAR)
+            else
+                team.prefix = ""
         }
 
     override var playerListSuffix: TextComponent?
         get() = team.suffix.ifEmpty { null }
             ?.let { LegacyComponentSerializer.legacy().deserialize(it, ChatColor.COLOR_CHAR) }
         set(value) {
-            if (value?.isEmpty != false)
-                team.suffix = ""
-            else
+            if (value != null && !value.isEmpty)
                 team.suffix = LegacyComponentSerializer.legacy().serialize(value, ChatColor.COLOR_CHAR)
+            else
+                team.suffix = ""
         }
 
     override var playerListHeader: TextComponent?
         get() = platformPlayer.playerListHeader?.ifEmpty { null }
             ?.let { LegacyComponentSerializer.legacy().deserialize(it, ChatColor.COLOR_CHAR) }
         set(value) {
-            if (value?.isEmpty != false)
-                platformPlayer.playerListHeader = null
-            else
+            if (value != null && !value.isEmpty)
                 platformPlayer.playerListHeader =
                     LegacyComponentSerializer.legacy().serialize(value, ChatColor.COLOR_CHAR)
+            else
+                platformPlayer.playerListHeader = null
         }
 
     override var playerListFooter: TextComponent?
         get() = platformPlayer.playerListFooter?.ifEmpty { null }
             ?.let { LegacyComponentSerializer.legacy().deserialize(it, ChatColor.COLOR_CHAR) }
         set(value) {
-            if (value?.isEmpty != false)
-                platformPlayer.playerListFooter = null
-            else
+            if (value != null && !value.isEmpty)
                 platformPlayer.playerListFooter =
                     LegacyComponentSerializer.legacy().serialize(value, ChatColor.COLOR_CHAR)
+            else
+                platformPlayer.playerListFooter = null
         }
 
     override fun sendMessage(text: Component) =

@@ -1,5 +1,6 @@
 package com.proximyst.tab.common
 
+import com.proximyst.tab.common.model.TabGroup
 import net.kyori.text.Component
 import net.kyori.text.TextComponent
 import java.util.*
@@ -80,4 +81,10 @@ interface ITabPlayer<P : Any> {
      * Do necessary cleanup for this player.
      */
     fun cleanup()
+
+    /**
+     * Return which groups are applicable from a list of groups.
+     */
+    fun filterApplicableGroups(groups: Collection<TabGroup>): List<TabGroup> =
+        groups.filter { hasPermission(it.permission) }
 }

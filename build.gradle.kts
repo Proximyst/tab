@@ -77,11 +77,11 @@ subprojects {
         }
 
         maven {
-            name = "aikar-repo"
-            url = uri("https://repo.aikar.co/content/groups/aikar/")
+            name = "clip"
+            url = uri("https://repo.extendedclip.com/content/repositories/placeholderapi/")
 
             content {
-                includeGroup("co.aikar")
+                includeGroup("me.clip")
             }
         }
 

@@ -1,19 +1,23 @@
 package com.proximyst.tab.bukkit
 
 import com.proximyst.tab.bukkit.ext.tabPlayer
+import com.proximyst.tab.bukkit.platform.BukkitPlaceholderApi
 import com.proximyst.tab.common.IPlatform
-import com.proximyst.tab.common.ITabPlayer
 import org.bukkit.Server
 import org.bukkit.entity.Player
 import java.util.*
 
-class BukkitPlatform(override val platform: Server) : IPlatform<Server, Player> {
-    override val onlinePlayers: Collection<ITabPlayer<Player>>
+class BukkitPlatform(override val platform: Server) : IPlatform<Server, Player, BukkitPlayer, BukkitPlaceholderApi> {
+    override val placeholderApi: BukkitPlaceholderApi? =
+        if (platform.pluginManager.isPluginEnabled("PlaceholderAPI")) BukkitPlaceholderApi()
+        else null
+
+    override val onlinePlayers: Collection<BukkitPlayer>
         get() = platform.onlinePlayers.map(Player::tabPlayer)
 
-    override fun getPlayer(name: String): ITabPlayer<Player>? =
+    override fun getPlayer(name: String): BukkitPlayer? =
         platform.getPlayerExact(name)?.let(Player::tabPlayer)
 
-    override fun getPlayer(uuid: UUID): ITabPlayer<Player>? =
+    override fun getPlayer(uuid: UUID): BukkitPlayer? =
         platform.getPlayer(uuid)?.let(Player::tabPlayer)
 }

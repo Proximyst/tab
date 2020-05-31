@@ -10,7 +10,7 @@ import java.nio.file.StandardCopyOption
 /**
  * Common interface between the plugins of each platform.
  */
-interface ITabPlatform<P: IPlatform<*, *>> {
+interface ITabPlatform<P: IPlatform<*, *, *, *>> {
     /**
      * The current platform.
      */
