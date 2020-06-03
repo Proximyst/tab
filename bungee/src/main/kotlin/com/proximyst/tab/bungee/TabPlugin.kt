@@ -18,6 +18,7 @@
 package com.proximyst.tab.bungee
 
 import com.proximyst.tab.bungee.command.BTabCommand
+import com.proximyst.tab.bungee.listener.TabPlayerListener
 import com.proximyst.tab.bungee.platform.BungeePlaceholderApi
 import com.proximyst.tab.common.ITabPlatform
 import com.proximyst.tab.common.PlatformTranscendingPlugin
@@ -113,6 +114,7 @@ class TabPlugin : Plugin(), ITabPlatform<BungeePlatform> {
         }
 
         proxy.pluginManager.registerCommand(this, BTabCommand(this))
+        proxy.pluginManager.registerListener(this, TabPlayerListener(this))
     }
 
     override fun onDisable() {
