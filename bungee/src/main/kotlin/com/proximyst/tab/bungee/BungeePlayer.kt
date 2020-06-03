@@ -65,6 +65,7 @@ class BungeePlayer(override val platformPlayer: ProxiedPlayer) : ITabPlayer<Prox
                 packet.players = arrayOf(playerName)
             }
             for (player in ProxyServer.getInstance().players) {
+                if (!player.isConnected) continue
                 player.unsafe().sendPacket(packet)
             }
         }
@@ -89,6 +90,7 @@ class BungeePlayer(override val platformPlayer: ProxiedPlayer) : ITabPlayer<Prox
                 packet.players = arrayOf(playerName)
             }
             for (player in ProxyServer.getInstance().players) {
+                if (!player.isConnected) continue
                 player.unsafe().sendPacket(packet)
             }
         }
@@ -159,6 +161,7 @@ class BungeePlayer(override val platformPlayer: ProxiedPlayer) : ITabPlayer<Prox
      * Sends a packet to the player with all the _existing_ order teams' data.
      */
     fun sendOrderTeams() {
+        if (!isConnected) return
         orderTeams.forEach { (_, team) ->
             platformPlayer.unsafe().sendPacket(team.toCreationPacket())
         }
@@ -168,6 +171,7 @@ class BungeePlayer(override val platformPlayer: ProxiedPlayer) : ITabPlayer<Prox
      * Send a packet to the player with its header & footer data.
      */
     internal fun updateTabHeaderFooter() {
+        if (!isConnected) return
         platformPlayer.unsafe().sendPacket(PlayerListHeaderFooter().also {
             it.header = GsonComponentSerializer.INSTANCE
                 .serialize(playerListHeader?.takeUnless { it.isEmpty } ?: TextComponent.empty())
@@ -180,6 +184,7 @@ class BungeePlayer(override val platformPlayer: ProxiedPlayer) : ITabPlayer<Prox
      * Send a packet to all players with this player's name in the player list.
      */
     internal fun updateDisplayName() {
+        if (!isConnected) return
         val name = TextComponent.make { // Build text component to avoid teams.
             val prefix = playerListPrefix // Can be mutated while reading.
             if (prefix != null && !prefix.isEmpty)
@@ -203,6 +208,7 @@ class BungeePlayer(override val platformPlayer: ProxiedPlayer) : ITabPlayer<Prox
         }
 
         for (p in ProxyServer.getInstance().players) {
+            if (!p.isConnected) continue
             p.unsafe().sendPacket(packet)
         }
     }
