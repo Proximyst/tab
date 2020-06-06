@@ -157,6 +157,10 @@ class BungeePlayer(override val platformPlayer: ProxiedPlayer) : ITabPlayer<Prox
     override fun hasPermission(permission: String): Boolean =
         platformPlayer.hasPermission(permission)
 
+    override fun init() {
+        sendOrderTeams()
+    }
+
     /**
      * Sends a packet to the player with all the _existing_ order teams' data.
      */
