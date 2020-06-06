@@ -26,7 +26,7 @@ import org.bukkit.entity.Player
  * already available.
  */
 val Player.tabPlayer: BukkitPlayer
-    get() = TabPlugin.instance.platformTranscendingPlugin.playerCache
+    get() = TabPlugin.instance.eventHandler.playerCache
         .computeIfAbsent(uniqueId) {
             BukkitPlayer(
                 this@tabPlayer

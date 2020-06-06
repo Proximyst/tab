@@ -18,9 +18,8 @@
 package com.proximyst.tab.bukkit
 
 import com.proximyst.tab.bukkit.listener.TabPlayerListener
-import com.proximyst.tab.bukkit.platform.BukkitPlaceholderApi
+import com.proximyst.tab.common.EventHandler
 import com.proximyst.tab.common.ITabPlatform
-import com.proximyst.tab.common.PlatformTranscendingPlugin
 import com.proximyst.tab.common.config.TomlConfiguration
 import com.proximyst.tab.common.config.commonvalues.GroupConfig
 import com.proximyst.tab.common.config.commonvalues.HeaderFooterConfig
@@ -28,8 +27,6 @@ import com.proximyst.tab.common.config.commonvalues.PlaceholderApiConfig
 import com.proximyst.tab.common.config.config
 import com.proximyst.tab.common.model.TabGroup
 import org.bukkit.Bukkit
-import org.bukkit.Server
-import org.bukkit.entity.Player
 import org.bukkit.event.HandlerList
 import org.bukkit.plugin.java.JavaPlugin
 import org.bukkit.scheduler.BukkitRunnable
@@ -43,23 +40,10 @@ class TabPlugin : JavaPlugin(), ITabPlatform<BukkitPlatform> {
         private set
     override val platform = BukkitPlatform(Bukkit.getServer())
 
-    /**
-     * The [PlatformTranscendingPlugin] instance.
-     *
-     * This does not get set if [PlaceholderApiConfig.pluginMessaging] is true.
-     */
-    lateinit var platformTranscendingPlugin: PlatformTranscendingPlugin<
-            Player,
-            BukkitPlayer,
-            Server,
-            BukkitPlaceholderApi,
-            BukkitPlatform,
-            TabPlugin
-            >
-        private set
+    val eventHandler = EventHandler(this, { headerFooter }, { groups })
 
     private val headerFooter: HeaderFooterConfig by config<HeaderFooterConfig>()
-    internal lateinit var groups: List<TabGroup>
+    private lateinit var groups: List<TabGroup>
     private val groupSettings: GroupConfig by config<GroupConfig>()
     private val placeholderApiSettings: PlaceholderApiConfig by config<PlaceholderApiConfig>("placeholderapi")
 
@@ -90,30 +74,21 @@ class TabPlugin : JavaPlugin(), ITabPlatform<BukkitPlatform> {
             it.to<TabGroup>()
         }
 
-        platformTranscendingPlugin = PlatformTranscendingPlugin(
-            this,
-            object : PlatformTranscendingPlugin.ConfigurationProvider {
-                override val headerFooterConfig: HeaderFooterConfig
-                    get() = this@TabPlugin.headerFooter
-                override val groups: List<TabGroup>
-                    get() = this@TabPlugin.groups
-            }
-        )
-        platformTranscendingPlugin.enable()
+        eventHandler.enable()
 
         server.pluginManager.registerEvents(TabPlayerListener(this), this)
 
         headerFooter.refreshInterval?.also { interval ->
             object : BukkitRunnable() {
                 override fun run() {
-                    platformTranscendingPlugin.refreshHeaderFooter()
+                    platform.onlinePlayers.forEach(eventHandler::applyHeaderFooter)
                 }
             }.runTaskTimerAsynchronously(this, interval, interval)
         }
         groupSettings.refreshInterval?.also { interval ->
             object : BukkitRunnable() {
                 override fun run() {
-                    platformTranscendingPlugin.refreshPlayerListData()
+                    platform.onlinePlayers.forEach(eventHandler::applyListGroup)
                 }
             }.runTaskTimerAsynchronously(this, interval, interval)
         }
@@ -121,8 +96,10 @@ class TabPlugin : JavaPlugin(), ITabPlatform<BukkitPlatform> {
 
     override fun onDisable() {
         HandlerList.unregisterAll(this)
-        if (placeholderApiSettings.pluginMessaging != true) // platformTranscendingPlugin is not set if this is true
-            platformTranscendingPlugin.disable()
+
+        // eventHandler has nothing to clean up if this is true
+        if (placeholderApiSettings.pluginMessaging != true)
+            eventHandler.disable()
     }
 
     override fun getPluginResourceAsInputStream(name: String): InputStream? =

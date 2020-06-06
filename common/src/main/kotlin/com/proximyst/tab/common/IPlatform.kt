@@ -22,7 +22,12 @@ import java.util.*
 /**
  * A platform on which the plugin can run and retrieve data.
  */
-interface IPlatform<Platform : Any, PlatformPlayer : Any, Player : ITabPlayer<PlatformPlayer>, PlaceholderApi: IPlaceholderApi<Player>> {
+interface IPlatform<
+        Platform : Any,
+        PlatformPlayer : Any,
+        Player : ITabPlayer<PlatformPlayer>,
+        PlaceholderApi: IPlaceholderApi<Player>
+        > {
     /**
      * The platform object on the current platform.
      */

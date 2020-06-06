@@ -26,7 +26,7 @@ import net.md_5.bungee.api.connection.ProxiedPlayer
  * already available.
  */
 val ProxiedPlayer.tabPlayer: BungeePlayer
-    get() = TabPlugin.instance.platformTranscendingPlugin.playerCache
+    get() = TabPlugin.instance.eventHandler.playerCache
         .computeIfAbsent(uniqueId) {
             BungeePlayer(this@tabPlayer)
         }

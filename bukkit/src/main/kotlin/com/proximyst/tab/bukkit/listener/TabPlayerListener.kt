@@ -17,6 +17,7 @@
  */
 package com.proximyst.tab.bukkit.listener
 
+import com.proximyst.tab.bukkit.BukkitPlayer
 import com.proximyst.tab.bukkit.TabPlugin
 import com.proximyst.tab.bukkit.ext.tabPlayer
 import com.proximyst.tab.common.ITabPlayer
@@ -31,13 +32,11 @@ import org.bukkit.event.player.PlayerQuitEvent
 class TabPlayerListener(private val main: TabPlugin) : Listener {
     @EventHandler
     fun registerPlayer(event: PlayerJoinEvent) {
-        main.platformTranscendingPlugin.joinedPlayer(
-            event.player.tabPlayer // Caches automatically
-        )
+        main.eventHandler.playerConnected(BukkitPlayer(event.player))
     }
 
     @EventHandler
     fun unregisterPlayer(event: PlayerQuitEvent) {
-        main.platformTranscendingPlugin.disconnectedPlayer(event.player.tabPlayer)
+        main.eventHandler.playerDisconnected(event.player.tabPlayer)
     }
 }

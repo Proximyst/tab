@@ -84,6 +84,11 @@ interface ITabPlayer<P : Any> {
     fun hasPermission(permission: String): Boolean
 
     /**
+     * Do necessary initialisation for this player.
+     */
+    fun init() = Unit
+
+    /**
      * Do necessary cleanup for this player.
      */
     fun cleanup() = Unit

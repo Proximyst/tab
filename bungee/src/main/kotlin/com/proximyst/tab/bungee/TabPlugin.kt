@@ -19,9 +19,8 @@ package com.proximyst.tab.bungee
 
 import com.proximyst.tab.bungee.command.BTabCommand
 import com.proximyst.tab.bungee.listener.TabPlayerListener
-import com.proximyst.tab.bungee.platform.BungeePlaceholderApi
+import com.proximyst.tab.common.EventHandler
 import com.proximyst.tab.common.ITabPlatform
-import com.proximyst.tab.common.PlatformTranscendingPlugin
 import com.proximyst.tab.common.config.TomlConfiguration
 import com.proximyst.tab.common.config.commonvalues.GroupConfig
 import com.proximyst.tab.common.config.commonvalues.HeaderFooterConfig
@@ -29,7 +28,6 @@ import com.proximyst.tab.common.config.commonvalues.PlaceholderApiConfig
 import com.proximyst.tab.common.config.config
 import com.proximyst.tab.common.model.TabGroup
 import net.md_5.bungee.api.ProxyServer
-import net.md_5.bungee.api.connection.ProxiedPlayer
 import net.md_5.bungee.api.plugin.Plugin
 import java.io.File
 import java.io.InputStream
@@ -46,26 +44,14 @@ class TabPlugin : Plugin(), ITabPlatform<BungeePlatform> {
         instance = this
     }
 
+    val eventHandler = EventHandler(this, { headerFooter }, { groups })
+
     internal var headerFooterConfigDelegate = config<HeaderFooterConfig>("header-footer")
     private val headerFooter: HeaderFooterConfig
         get() = headerFooterConfigDelegate.getValue(this, this::headerFooter)
     internal lateinit var groups: List<TabGroup>
     private val groupSettings: GroupConfig by config<GroupConfig>()
     internal val placeholderApiSettings: PlaceholderApiConfig by config<PlaceholderApiConfig>("placeholderapi")
-
-    /**
-     * The [PlatformTranscendingPlugin] instance.
-     *
-     * Unlike on Bukkit, this is always set.
-     */
-    lateinit var platformTranscendingPlugin: PlatformTranscendingPlugin<
-            ProxiedPlayer,
-            BungeePlayer,
-            ProxyServer,
-            BungeePlaceholderApi,
-            BungeePlatform,
-            TabPlugin
-            >
 
     override fun onEnable() {
         tomlConfig = TomlConfiguration(this, File(dataFolder, "config.toml"), "config.toml")
@@ -78,21 +64,14 @@ class TabPlugin : Plugin(), ITabPlatform<BungeePlatform> {
             it.to<TabGroup>()
         }
 
-        platformTranscendingPlugin = PlatformTranscendingPlugin(
-            this,
-            object : PlatformTranscendingPlugin.ConfigurationProvider {
-                override val groups: List<TabGroup>
-                    get() = this@TabPlugin.groups
-                override val headerFooterConfig: HeaderFooterConfig
-                    get() = this@TabPlugin.headerFooter
-            }
-        )
-        platformTranscendingPlugin.enable()
+        eventHandler.enable()
 
         headerFooter.refreshInterval?.also { interval ->
             proxy.scheduler.schedule(
                 this,
-                platformTranscendingPlugin::refreshHeaderFooter,
+                {
+                    platform.onlinePlayers.forEach(eventHandler::applyHeaderFooter)
+                },
                 interval,
                 interval,
                 TimeUnit.MILLISECONDS
@@ -101,7 +80,9 @@ class TabPlugin : Plugin(), ITabPlatform<BungeePlatform> {
         groupSettings.refreshInterval?.also { interval ->
             proxy.scheduler.schedule(
                 this,
-                platformTranscendingPlugin::refreshPlayerListData,
+                {
+                    platform.onlinePlayers.forEach(eventHandler::applyListGroup)
+                },
                 interval,
                 interval,
                 TimeUnit.MILLISECONDS
@@ -120,7 +101,7 @@ class TabPlugin : Plugin(), ITabPlatform<BungeePlatform> {
     override fun onDisable() {
         proxy.pluginManager.unregisterListeners(this)
         proxy.pluginManager.unregisterCommands(this)
-        platformTranscendingPlugin.disable()
+        eventHandler.disable()
     }
 
     override fun getPluginResourceAsInputStream(name: String): InputStream? =
