@@ -15,7 +15,9 @@ public interface IPlatform<Player extends IPlayer> {
   /**
    * @return Whether this platform is a proxy.
    */
-  boolean isProxy();
+  default boolean isProxy() {
+    return false;
+  }
 
   /**
    * @return All currently connected players.
