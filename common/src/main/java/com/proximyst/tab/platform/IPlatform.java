@@ -1,6 +1,7 @@
 package com.proximyst.tab.platform;
 
 import com.proximyst.tab.platform.factories.IPlayerFactory;
+import com.proximyst.tab.platform.factories.ITeamFactory;
 import java.util.Collection;
 import java.util.UUID;
 import org.jetbrains.annotations.NotNull;
@@ -48,4 +49,10 @@ public interface IPlatform<Player extends IPlayer> {
    */
   @NotNull
   IPlayerFactory<?, Player> getPlayerFactory();
+
+  /**
+   * @return This platform's {@link ITeamFactory}.
+   */
+  @NotNull
+  ITeamFactory<?, ITeam> getTeamFactory();
 }
