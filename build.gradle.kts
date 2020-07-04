@@ -48,6 +48,7 @@ subprojects {
 
             content {
                 includeGroup("net.md-5")
+                includeGroup("net.kyori")
             }
         }
 
